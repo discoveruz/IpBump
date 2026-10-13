@@ -1,0 +1,10 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+
+# Installers written by build-installer.bat
+installer/output/

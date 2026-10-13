@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>IpBump</AssemblyName>
+    <RootNamespace>IpBump</RootNamespace>
+    <Version>2.2.1</Version>
+    <Product>IpBump</Product>
+    <ApplicationIcon>Assets\IpBump.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+
+    <!-- Self-contained (no .NET install needed on target PCs). The installer packs the publish folder. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.1" />
+    <PackageReference Include="WPF-UI" Version="4.3.0" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.3.2" />
+    <PackageReference Include="ModelContextProtocol.Core" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Program.Main decides which role to run, so WPF must not generate its own entry point -->
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
+    <!-- WPF projects leave System.IO out of the implicit usings -->
+    <Using Include="System.IO" />
+    <!-- Drawn by tools\make-icon.ps1; also shown inside the settings window -->
+    <Resource Include="Assets\IpBump.ico" />
+  </ItemGroup>
+
+</Project>
