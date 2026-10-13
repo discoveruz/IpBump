@@ -22,7 +22,9 @@ It changes the address on your local network (LAN) only. The public IP that webs
 
 ## Install
 
-There is no download yet. [Build the installer](#build), then run `IpBump-Setup-<version>.exe`.
+Download `IpBump-Setup-<version>.exe` from the [latest release](https://github.com/discoveruz/IpBump/releases/latest) and run it. You can also [build the installer](#build) yourself.
+
+The installer is not signed, so Windows may show "Windows protected your PC". Choose **More info**, then **Run anyway**.
 
 The installer asks for administrator rights once, to register the service. It offers two options:
 
