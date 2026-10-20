@@ -37,6 +37,12 @@ public struct IpChanger: IpChanging {
         try lock.withLock {
             let before = try current(s)
             guard before.up else { throw IpBumpError("\"\(s.service)\" is not connected.") }
+            // The saved address, mask, router and DNS describe one network. On another one (a laptop that moved),
+            // every address in the saved range is silent, and taking one would cut the Mac off from where it is
+            if IPv4.isValid(before.ip), IPv4.isValid(s.ip), IPv4.isMask(s.mask), !IPv4.sameNetwork(before.ip, s.ip, mask: s.mask) {
+                throw IpBumpError("\"\(s.service)\" is on another network now (\(before.ip)). "
+                    + "Open IpBump's settings, choose \"Use the service's current values\" and save.")
+            }
 
             let finder = FreeAddressFinder(helper: helper)
             var taken: [String] = []

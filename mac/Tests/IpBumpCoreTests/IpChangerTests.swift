@@ -33,6 +33,16 @@ struct IpChangerTests {
         #expect(net.applied.isEmpty)
     }
 
+    /// Review fix: settings saved at home, laptop now on another network. A "free" address from the saved range
+    /// would take the Mac off the network it is on, and nothing would answer to show it.
+    @Test func refusesToChangeOnAnotherNetwork() {
+        net.state?.ip = "10.0.0.5"
+        #expect(throws: IpBumpError("\"Wi-Fi\" is on another network now (10.0.0.5). Open IpBump's settings, choose \"Use the service's current values\" and save.")) {
+            try changer.toFreeAddress(s, source: "Claude Code", progress: nil)
+        }
+        #expect(net.applied.isEmpty && net.probes.isEmpty)
+    }
+
     @Test func everyAddressInUse() {
         var r = s
         r.rangeStart = "192.168.1.100"
