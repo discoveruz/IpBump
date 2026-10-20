@@ -17,5 +17,5 @@ pkill -f '^/Applications/IpBump.app/Contents/MacOS/IpBump$'
 rm -f "/Library/LaunchDaemons/$HELPER.plist" "/Library/LaunchAgents/$AGENT.plist" \
       "/Library/PrivilegedHelperTools/$HELPER" /var/run/io.github.discoveruz.ipbump.v1.sock
 rm -rf /Applications/IpBump.app
-pkgutil --forget io.github.discoveruz.ipbump >/dev/null 2>&1
+for id in io.github.discoveruz.ipbump.app io.github.discoveruz.ipbump.helper; do pkgutil --forget "$id" >/dev/null 2>&1; done
 echo "IpBump is removed."

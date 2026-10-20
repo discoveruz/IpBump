@@ -34,7 +34,7 @@ It downloads the installer from the [latest release](https://github.com/discover
 
 You can also download `IpBump-<version>.pkg` from the latest release and open it, or [build it](#build) yourself. The installer is not signed, so macOS first says it can't check it for malicious software. Open **System Settings › Privacy & Security**, scroll down to the message about IpBump, choose **Open Anyway**, then open the installer again.
 
-Either way, macOS asks for your password once, to install the helper. IpBump then starts by itself, and again at every login for every user. To stop that, switch IpBump off in **System Settings › General › Login Items & Extensions**.
+Either way, macOS asks for your password once, to install the helper. IpBump then starts by itself, and again at every login for every user. To stop that, switch IpBump off in **System Settings › General › Login Items & Extensions**. Leave the helper (`io.github.discoveruz.ipbump.helper`) on: it applies the changes.
 
 On the first start the Settings window opens by itself. The network service your Mac is online with is already picked and its current values are filled in. Check them and press **Save**.
 

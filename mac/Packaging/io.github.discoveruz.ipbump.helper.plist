@@ -13,10 +13,7 @@
 	<true/>
 	<key>KeepAlive</key>
 	<true/>
-	<!-- Login Items in System Settings shows it under IpBump's name -->
-	<key>AssociatedBundleIdentifiers</key>
-	<array>
-		<string>io.github.discoveruz.ipbump</string>
-	</array>
+	<!-- No AssociatedBundleIdentifiers: tied to the app, it would share the app's switch in Login Items, and
+	     switching off "start at login" would stop the helper too -->
 </dict>
 </plist>

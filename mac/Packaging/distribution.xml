@@ -9,8 +9,11 @@
     <choices-outline>
         <line choice="io.github.discoveruz.ipbump"/>
     </choices-outline>
+    <!-- The app first: the helper package's postinstall starts it -->
     <choice id="io.github.discoveruz.ipbump" visible="false" title="IpBump">
-        <pkg-ref id="io.github.discoveruz.ipbump"/>
+        <pkg-ref id="io.github.discoveruz.ipbump.app"/>
+        <pkg-ref id="io.github.discoveruz.ipbump.helper"/>
     </choice>
-    <pkg-ref id="io.github.discoveruz.ipbump" version="__VERSION__" onConclusion="none">IpBump-component.pkg</pkg-ref>
+    <pkg-ref id="io.github.discoveruz.ipbump.app" version="__VERSION__" onConclusion="none">IpBump-app.pkg</pkg-ref>
+    <pkg-ref id="io.github.discoveruz.ipbump.helper" version="__VERSION__" onConclusion="none">IpBump-helper.pkg</pkg-ref>
 </installer-gui-script>

@@ -3,8 +3,17 @@
 HELPER=io.github.discoveruz.ipbump.helper
 AGENT=io.github.discoveruz.ipbump
 
+# Right after a bootout, launchd may still be letting go of the old copy for a moment
+bootstrap() {   # <domain> <plist>
+    for _ in 1 2 3 4 5; do
+        launchctl bootstrap "$1" "$2" 2>/dev/null && return 0
+        sleep 1
+    done
+    launchctl bootstrap "$1" "$2"   # once more, so the reason lands in the install log
+}
+
 launchctl bootout "system/$HELPER" 2>/dev/null
-launchctl bootstrap system "/Library/LaunchDaemons/$HELPER.plist"
+bootstrap system "/Library/LaunchDaemons/$HELPER.plist"
 
 user=$(stat -f %Su /dev/console)
 if [ -n "$user" ] && [ "$user" != root ] && [ "$user" != loginwindow ]; then
@@ -12,6 +21,6 @@ if [ -n "$user" ] && [ "$user" != root ] && [ "$user" != loginwindow ]; then
     launchctl bootout "gui/$uid/$AGENT" 2>/dev/null
     # Only the menu bar app: an agent's "IpBump mcp" keeps running until the agent restarts it
     pkill -U "$uid" -f '^/Applications/IpBump.app/Contents/MacOS/IpBump$'
-    launchctl bootstrap "gui/$uid" "/Library/LaunchAgents/$AGENT.plist"
+    bootstrap "gui/$uid" "/Library/LaunchAgents/$AGENT.plist"
 fi
 exit 0

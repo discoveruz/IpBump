@@ -54,18 +54,26 @@ if [ "${1:-}" = "--app-only" ]; then
     exit 0
 fi
 
-ROOT=dist/root
-mkdir -p "$ROOT/Applications" "$ROOT/Library/PrivilegedHelperTools" "$ROOT/Library/LaunchDaemons" "$ROOT/Library/LaunchAgents"
-cp -R "$APP" "$ROOT/Applications/"
-cp dist/io.github.discoveruz.ipbump.helper "$ROOT/Library/PrivilegedHelperTools/"
-cp Packaging/io.github.discoveruz.ipbump.helper.plist "$ROOT/Library/LaunchDaemons/"
-cp Packaging/io.github.discoveruz.ipbump.plist "$ROOT/Library/LaunchAgents/"
-chmod 755 "$ROOT/Library/PrivilegedHelperTools/io.github.discoveruz.ipbump.helper"
-chmod 644 "$ROOT"/Library/LaunchDaemons/*.plist "$ROOT"/Library/LaunchAgents/*.plist
+# Two packages. The app goes in as a component, which leaves /Applications itself alone. The helper and the
+# launchd files go into /Library, whose folders the payload mirrors exactly, so Installer finds nothing to change.
+pkgbuild --component "$APP" --install-location /Applications --identifier io.github.discoveruz.ipbump.app \
+    --version "$VERSION" dist/IpBump-app.pkg
+rm -rf dist/check
+pkgutil --expand dist/IpBump-app.pkg dist/check
+# A relocatable bundle would let Installer update a stray copy of IpBump.app (in mac/dist, say) instead
+grep -q 'relocatable="false"' dist/check/PackageInfo || { echo "IpBump.app came out relocatable"; exit 1; }
 
-pkgbuild --root "$ROOT" --component-plist Packaging/component.plist --scripts Packaging/scripts \
-    --identifier io.github.discoveruz.ipbump --version "$VERSION" --install-location / --ownership recommended \
-    dist/IpBump-component.pkg
+LIBRARY=dist/library
+mkdir -p "$LIBRARY/PrivilegedHelperTools" "$LIBRARY/LaunchDaemons" "$LIBRARY/LaunchAgents"
+cp dist/io.github.discoveruz.ipbump.helper "$LIBRARY/PrivilegedHelperTools/"
+cp Packaging/io.github.discoveruz.ipbump.helper.plist "$LIBRARY/LaunchDaemons/"
+cp Packaging/io.github.discoveruz.ipbump.plist "$LIBRARY/LaunchAgents/"
+chmod 755 "$LIBRARY" "$LIBRARY/LaunchDaemons" "$LIBRARY/LaunchAgents" "$LIBRARY/PrivilegedHelperTools/io.github.discoveruz.ipbump.helper"
+chmod 1755 "$LIBRARY/PrivilegedHelperTools"
+chmod 644 "$LIBRARY"/LaunchDaemons/*.plist "$LIBRARY"/LaunchAgents/*.plist
+pkgbuild --root "$LIBRARY" --install-location /Library --scripts Packaging/scripts --ownership recommended \
+    --identifier io.github.discoveruz.ipbump.helper --version "$VERSION" dist/IpBump-helper.pkg
+
 sed "s/__VERSION__/$VERSION/g" Packaging/distribution.xml > dist/distribution.xml
 PKG="dist/IpBump-$VERSION.pkg"
 productbuild --distribution dist/distribution.xml --package-path dist \
