@@ -24,7 +24,13 @@ This is the Mac version of the Windows app in the [main README](../README.md).
 
 ## Install
 
-The simplest way is one line in Terminal:
+With [Homebrew](https://brew.sh):
+
+```sh
+brew install --cask discoveruz/tap/ipbump
+```
+
+`brew upgrade` keeps it up to date from then on. Without Homebrew, the simplest way is one line in Terminal:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/discoveruz/IpBump/main/mac/install.sh | sh
@@ -34,7 +40,7 @@ It downloads the installer from the [latest release](https://github.com/discover
 
 You can also download `IpBump-<version>.pkg` from the latest release and open it, or [build it](#build) yourself. The installer is not signed, so macOS first says it can't check it for malicious software. Open **System Settings › Privacy & Security**, scroll down to the message about IpBump, choose **Open Anyway**, then open the installer again.
 
-Either way, macOS asks for your password once, to install the helper. IpBump then starts by itself, and again at every login for every user. To stop that, switch IpBump off in **System Settings › General › Login Items & Extensions**. Leave the helper (`io.github.discoveruz.ipbump.helper`) on: it applies the changes.
+Whichever way you choose, you're asked for your password once, to install the helper. IpBump then starts by itself, and again at every login for every user. To stop that, switch IpBump off in **System Settings › General › Login Items & Extensions**. Leave the helper (`io.github.discoveruz.ipbump.helper`) on: it applies the changes.
 
 On the first start the Settings window opens by itself. The network service your Mac is online with is already picked and its current values are filled in. Check them and press **Save**.
 
@@ -192,21 +198,21 @@ IPBUMP_HELPER_SOCKET=/tmp/ipbump-dev.sock mac/.build/debug/IpBump       # in ano
 
 A build outside `IpBump.app` shows no notifications. `sudo mac/.build/debug/ipbump-helper --probe "Wi-Fi" 192.168.1.1 192.168.1.50` prints the addresses another device answers for.
 
-To release, upload `IpBump-<version>.pkg` and `IpBump-<version>.pkg.sha256` to the same GitHub release as the Windows installer. `install.sh` takes the newest release's `.pkg`.
+To release, upload `IpBump-<version>.pkg` and `IpBump-<version>.pkg.sha256` to the same GitHub release as the Windows installer. `install.sh` takes the newest release's `.pkg`. Then set `version` and `sha256` in `Casks/ipbump.rb` in [discoveruz/homebrew-tap](https://github.com/discoveruz/homebrew-tap) to the new version and the checksum from the `.sha256` file, so that `brew upgrade` finds it.
 
 ## Uninstall
 
-Choose **Uninstall IpBump…** at the bottom of Settings, or run:
+If you installed IpBump with Homebrew, run `brew uninstall --cask ipbump`. Otherwise choose **Uninstall IpBump…** at the bottom of Settings, or run:
 
 ```sh
 sudo /Applications/IpBump.app/Contents/Resources/uninstall.sh
 ```
 
-It removes the app, the helper and the login item. It leaves three things as they are:
+Either way, the app, the helper and the login item are removed. Three things stay as they are:
 
 - **Your network settings.** Choose **Switch back to automatic (DHCP)** first if you want that back.
 - **Your agents' configuration.** Press **Disconnect** for each connected agent first.
-- **Your IpBump settings** in `~/Library/Application Support/IpBump`.
+- **Your IpBump settings** in `~/Library/Application Support/IpBump`. With Homebrew, `brew uninstall --zap --cask ipbump` removes them too.
 
 ## License
 

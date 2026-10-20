@@ -43,7 +43,13 @@ IpBump gives the adapter a manual address. If your router hands out addresses by
 
 ### Mac
 
-In Terminal:
+With [Homebrew](https://brew.sh):
+
+```sh
+brew install --cask discoveruz/tap/ipbump
+```
+
+`brew upgrade` keeps it up to date from then on. Without Homebrew, run this in Terminal:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/discoveruz/IpBump/main/mac/install.sh | sh
@@ -51,7 +57,7 @@ curl -fsSL https://raw.githubusercontent.com/discoveruz/IpBump/main/mac/install.
 
 It downloads `IpBump-<version>.pkg` from the latest release, checks its checksum and installs it. You can also download the `.pkg` yourself and open it. It is not signed: when macOS refuses to open it, choose **Open Anyway** in **System Settings › Privacy & Security** and open it again.
 
-Either way, macOS asks for your password once, to install the helper that applies the changes. On the first start the settings window opens by itself, as on Windows. After that, Option-click the address in the menu bar for a new one. The rest is in [IpBump for Mac](mac/README.md).
+Whichever way you choose, you're asked for your password once, to install the helper that applies the changes. On the first start the settings window opens by itself, as on Windows. After that, Option-click the address in the menu bar for a new one. The rest is in [IpBump for Mac](mac/README.md).
 
 ## Use
 
@@ -207,7 +213,7 @@ Remove IpBump under **Settings > Apps > Installed apps**. The uninstaller remove
 - **Your agents' configuration.** Press **Disconnect** for each connected agent first.
 - **Your IpBump settings** in `%APPDATA%\IpBump`.
 
-On a Mac, choose **Uninstall IpBump…** at the bottom of Settings. [IpBump for Mac](mac/README.md#uninstall) says what it removes.
+On a Mac, choose **Uninstall IpBump…** at the bottom of Settings, or run `brew uninstall --cask ipbump` if you installed it with Homebrew. [IpBump for Mac](mac/README.md#uninstall) says what it removes.
 
 ## License
 
