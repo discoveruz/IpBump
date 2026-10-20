@@ -30,5 +30,8 @@ struct NetworkSetupTests {
         #expect(NetworkSetup.failure(exitCode: 0, output: "** Error: The parameters were not valid.\n") == "** Error: The parameters were not valid.")
         #expect(NetworkSetup.failure(exitCode: 0, output: "Wi-Fii is not a recognized network service.\n") == "Wi-Fii is not a recognized network service.")
         #expect(NetworkSetup.failure(exitCode: 4, output: "") == "networksetup failed (4)")
+        // What networksetup on macOS 26 prints for a service it doesn't know, with exit code 4
+        #expect(NetworkSetup.failure(exitCode: 4, output: "No Such Service is not a recognized network service.\n** Error: The parameters were not valid.\n")
+            == "No Such Service is not a recognized network service.\n** Error: The parameters were not valid.")
     }
 }
