@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>IpBump</title>
+    <options customize="never" require-scripts="false" hostArchitectures="arm64,x86_64"/>
+    <domains enable_localSystem="true" enable_anywhere="false" enable_currentUserHome="false"/>
+    <allowed-os-versions>
+        <os-version min="14.0"/>
+    </allowed-os-versions>
+    <choices-outline>
+        <line choice="io.github.discoveruz.ipbump"/>
+    </choices-outline>
+    <choice id="io.github.discoveruz.ipbump" visible="false" title="IpBump">
+        <pkg-ref id="io.github.discoveruz.ipbump"/>
+    </choice>
+    <pkg-ref id="io.github.discoveruz.ipbump" version="__VERSION__" onConclusion="none">IpBump-component.pkg</pkg-ref>
+</installer-gui-script>

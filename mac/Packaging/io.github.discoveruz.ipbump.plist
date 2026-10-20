@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Starts IpBump at login for every user (installed in /Library/LaunchAgents); System Settings › Login Items turns it off -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>io.github.discoveruz.ipbump</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Applications/IpBump.app/Contents/MacOS/IpBump</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>ProcessType</key>
+	<string>Interactive</string>
+	<key>AssociatedBundleIdentifiers</key>
+	<array>
+		<string>io.github.discoveruz.ipbump</string>
+	</array>
+</dict>
+</plist>

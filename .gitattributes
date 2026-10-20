@@ -2,3 +2,4 @@
 * text=auto eol=lf
 *.ico binary
 installer/THIRD-PARTY-NOTICES.txt text eol=crlf
+*.icns binary

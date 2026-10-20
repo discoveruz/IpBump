@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- The root helper: applies network settings and sends ARP probes for everyone else (installed in /Library/LaunchDaemons) -->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>io.github.discoveruz.ipbump.helper</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Library/PrivilegedHelperTools/io.github.discoveruz.ipbump.helper</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<!-- Login Items in System Settings shows it under IpBump's name -->
+	<key>AssociatedBundleIdentifiers</key>
+	<array>
+		<string>io.github.discoveruz.ipbump</string>
+	</array>
+</dict>
+</plist>

@@ -1,0 +1,17 @@
+#!/bin/bash
+# Runs as root once the files are in place: (re)start the helper, then IpBump for whoever is signed in.
+HELPER=io.github.discoveruz.ipbump.helper
+AGENT=io.github.discoveruz.ipbump
+
+launchctl bootout "system/$HELPER" 2>/dev/null
+launchctl bootstrap system "/Library/LaunchDaemons/$HELPER.plist"
+
+user=$(stat -f %Su /dev/console)
+if [ -n "$user" ] && [ "$user" != root ] && [ "$user" != loginwindow ]; then
+    uid=$(id -u "$user")
+    launchctl bootout "gui/$uid/$AGENT" 2>/dev/null
+    # Only the menu bar app: an agent's "IpBump mcp" keeps running until the agent restarts it
+    pkill -U "$uid" -f '^/Applications/IpBump.app/Contents/MacOS/IpBump$'
+    launchctl bootstrap "gui/$uid" "/Library/LaunchAgents/$AGENT.plist"
+fi
+exit 0
