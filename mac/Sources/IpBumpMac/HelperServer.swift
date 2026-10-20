@@ -15,7 +15,11 @@ public final class HelperServer: @unchecked Sendable {
     let backend: HelperBackend
     let readTimeout: Duration
     private var listener: Int32 = -1
+    private let state = NSLock()
+    private var stopped = false
     private let log = Logger(subsystem: "io.github.discoveruz.ipbump", category: "helper")
+    /// accept(2); tests make it fail.
+    var acceptClient: @Sendable (Int32) -> Int32 = { accept($0, nil, nil) }
 
     public init(socketPath: String, backend: HelperBackend, readTimeout: Duration = .seconds(5)) {
         self.socketPath = socketPath
@@ -28,10 +32,16 @@ public final class HelperServer: @unchecked Sendable {
         listener = fd
         Thread.detachNewThread { [self] in
             while true {
-                let client = accept(fd, nil, nil)
-                if client < 0 {
-                    if errno == EINTR { continue }
-                    return   // stopped
+                let client = acceptClient(fd)
+                if isStopped {
+                    if client >= 0 { close(client) }
+                    return
+                }
+                guard client >= 0 else {
+                    // A client that gave up before it was accepted, or a moment without file descriptors: keep
+                    // listening. launchd restarts a helper that exits, never one that runs on without listening
+                    if errno != EINTR { Thread.sleep(forTimeInterval: 0.1) }
+                    continue
                 }
                 LineSocket.noSigPipe(client)
                 LineSocket.sendTimeout(client, readTimeout)
@@ -43,9 +53,17 @@ public final class HelperServer: @unchecked Sendable {
 
     public func stop() {
         guard listener >= 0 else { return }
+        state.lock()
+        stopped = true
+        state.unlock()
         shutdown(listener, SHUT_RDWR)   // wakes the waiting accept()
         close(listener)
         listener = -1
+    }
+
+    var isStopped: Bool {
+        state.lock(); defer { state.unlock() }
+        return stopped
     }
 
     func serve(_ client: Int32) {

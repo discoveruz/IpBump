@@ -64,6 +64,28 @@ final class HelperServerTests {
         #expect(backend.applied.count == 1)
     }
 
+    /// Review fix: one failed accept() (a client that gave up first, a moment without file descriptors) must not
+    /// stop the helper. launchd restarts a helper that exits, never one that keeps running without listening.
+    @Test func keepsServingAfterAFailedAccept() throws {
+        let otherPath = temporarySocketPath()
+        let other = HelperServer(socketPath: otherPath, backend: backend, readTimeout: .milliseconds(200))
+        let failures = Countdown(1)
+        other.acceptClient = { fd in
+            if failures.take() {
+                errno = ECONNABORTED
+                return -1
+            }
+            return accept(fd, nil, nil)
+        }
+        try other.start()
+        defer {
+            other.stop()
+            unlink(otherPath)
+        }
+        try SocketHelper(socketPath: otherPath, responseTimeout: .seconds(2)).apply(IpConfig(service: "Wi-Fi", dhcp: true))
+        #expect(backend.applied.count == 1)
+    }
+
     @Test func dropsSilentClients() throws {
         let silent = try #require(LineSocket.connect(path: path, timeout: .seconds(1)))
         defer { close(silent) }

@@ -35,3 +35,18 @@ final class FakeBackend: HelperBackend, @unchecked Sendable {
 
     func probe(service: String, addresses: [String]) throws -> Set<String> { answered.intersection(addresses) }
 }
+
+/// True for the first `count` calls, then false.
+final class Countdown: @unchecked Sendable {
+    private let lock = NSLock()
+    private var left: Int
+
+    init(_ count: Int) { left = count }
+
+    func take() -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        guard left > 0 else { return false }
+        left -= 1
+        return true
+    }
+}
