@@ -76,3 +76,35 @@ final class FakeLink: LinkLayer, @unchecked Sendable {
         sent.map { f in UInt32(f[38]) << 24 | UInt32(f[39]) << 16 | UInt32(f[40]) << 8 | UInt32(f[41]) }
     }
 }
+
+/// Stands in for IpChanger where only the outcome of a change matters.
+final class FakeChanger: IpChanging, @unchecked Sendable {
+    private let lock = NSLock()
+    var result = ChangeResult(service: "Wi-Fi", oldIp: "192.168.1.10", newIp: "192.168.1.11")
+    var error: IpBumpError?
+    /// When set, a change waits for a signal before it finishes.
+    var gate: DispatchSemaphore?
+    private var recorded: [String] = []
+
+    /// The source of every toFreeAddress call, recorded as the call starts.
+    var sources: [String] {
+        lock.lock(); defer { lock.unlock() }
+        return recorded
+    }
+
+    func toFreeAddress(_ s: UserSettings, source: String, progress: (@Sendable (String) -> Void)?) throws -> ChangeResult {
+        lock.lock(); recorded.append(source); lock.unlock()
+        gate?.wait()
+        if let error { throw error }
+        return result
+    }
+
+    func applySettings(_ s: UserSettings) throws {
+        if let error { throw error }
+    }
+
+    func useDhcp(_ s: UserSettings) throws {
+        gate?.wait()
+        if let error { throw error }
+    }
+}
