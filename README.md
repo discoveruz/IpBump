@@ -22,6 +22,8 @@ This page describes the Windows app. The Mac app does the same from the menu bar
 - Windows 10 version 1809 or later, 64-bit. The address on the taskbar needs Windows 11.
 - Nothing else. The installer carries its own copy of .NET.
 
+IpBump for Mac needs macOS 14 Sonoma or later, on Apple silicon or Intel.
+
 ## Install
 
 ### Windows
@@ -47,7 +49,9 @@ In Terminal:
 curl -fsSL https://raw.githubusercontent.com/discoveruz/IpBump/main/mac/install.sh | sh
 ```
 
-Or download `IpBump-<version>.pkg` from the same release and open it. The installer is not signed: when macOS refuses to open it, choose **Open Anyway** in **System Settings › Privacy & Security** and open it again. The rest is in [IpBump for Mac](mac/README.md).
+It downloads `IpBump-<version>.pkg` from the latest release, checks its checksum and installs it. You can also download the `.pkg` yourself and open it. It is not signed: when macOS refuses to open it, choose **Open Anyway** in **System Settings › Privacy & Security** and open it again.
+
+Either way, macOS asks for your password once, to install the helper that applies the changes. On the first start the settings window opens by itself, as on Windows. After that, Option-click the address in the menu bar for a new one. The rest is in [IpBump for Mac](mac/README.md).
 
 ## Use
 
@@ -165,8 +169,11 @@ Only one change runs at a time, whoever asked for it.
 | `IpBump/AgentServer.cs`, `Agent.cs` | The MCP server, the Claude Code hook, and the Connect buttons |
 | `installer/IpBump.iss` | The Inno Setup script |
 | `tools/make-icon.ps1` | Draws `IpBump/Assets/IpBump.ico` |
+| `mac/` | IpBump for Mac, laid out in [its own README](mac/README.md#source-layout) |
 
 ## Build
+
+This builds the Windows version. IpBump for Mac is built on a Mac: see [IpBump for Mac](mac/README.md#build).
 
 You need:
 
@@ -199,6 +206,8 @@ Remove IpBump under **Settings > Apps > Installed apps**. The uninstaller remove
 - **Your network settings.** Choose **Switch back to automatic (DHCP)** first if you want that back.
 - **Your agents' configuration.** Press **Disconnect** for each connected agent first.
 - **Your IpBump settings** in `%APPDATA%\IpBump`.
+
+On a Mac, choose **Uninstall IpBump…** at the bottom of Settings. [IpBump for Mac](mac/README.md#uninstall) says what it removes.
 
 ## License
 

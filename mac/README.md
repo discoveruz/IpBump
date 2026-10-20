@@ -67,6 +67,8 @@ The menu bar also tells you how things are going:
 
 If you can't see the address: a full menu bar hides items behind a MacBook's camera notch. Make room, or switch off **Show the full address in the menu bar**.
 
+IpBump's settings describe one network. When the Mac is on another one, a laptop that moved say, IpBump changes nothing and the menu says why: open Settings, choose **Use the service's current values** and press **Save**.
+
 ### Settings
 
 | Setting | What it is for |
@@ -140,7 +142,7 @@ A change goes through three steps:
 2. **Apply it.** The app, the MCP server and the hook have no right to change network settings. They send the request over a local socket to the helper, which checks it (the service must exist, every address must be valid IPv4) and applies it with `networksetup`.
 3. **Check it.** IpBump waits until macOS uses the new address, then asks once more whether another device answers for it. If one does, the next free address is tried, up to three times. If the change still fails, the previous settings are put back.
 
-Only one change runs at a time, whoever asked for it. As on Windows, every user of the Mac may ask the helper for a change.
+Only one change runs at a time, whoever asked for it. As on Windows, everyone who signs in to the Mac may ask the helper for a change, without a password. System accounts such as `_www` can't reach it.
 
 ### Source layout
 
@@ -156,7 +158,7 @@ Only one change runs at a time, whoever asked for it. As on Windows, every user 
 
 ## Build
 
-You need macOS 14 or later and Xcode 26 or later.
+You need Xcode 26 or later, for Swift 6.2. Xcode 26 runs on macOS 15.6 or later; the IpBump it builds runs on macOS 14 and later.
 
 Run the tests:
 
