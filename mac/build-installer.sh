@@ -57,11 +57,17 @@ fi
 # Two packages. The app goes in as a component, which leaves /Applications itself alone. The helper and the
 # launchd files go into /Library, whose folders the payload mirrors exactly, so Installer finds nothing to change.
 pkgbuild --component "$APP" --install-location /Applications --identifier io.github.discoveruz.ipbump.app \
-    --version "$VERSION" dist/IpBump-app.pkg
-rm -rf dist/check
+    --version "$VERSION" dist/component.pkg
+# pkgbuild marks a component's bundle relocatable: Installer then updates any other copy with the same id
+# (mac/dist/IpBump.app, say) instead of installing /Applications/IpBump.app. Its option against that needs --root,
+# which would record /Applications' own permissions, so the mark comes out of the finished package instead
+pkgutil --expand dist/component.pkg dist/component
+sed -i '' '/<relocate>/,/<\/relocate>/{/<bundle /d;}' dist/component/PackageInfo
+pkgutil --flatten dist/component dist/IpBump-app.pkg
+rm -rf dist/component dist/component.pkg dist/check
 pkgutil --expand dist/IpBump-app.pkg dist/check
-# A relocatable bundle would let Installer update a stray copy of IpBump.app (in mac/dist, say) instead
-grep -q 'relocatable="false"' dist/check/PackageInfo || { echo "IpBump.app came out relocatable"; exit 1; }
+[ "$(xmllint --xpath 'count(/pkg-info/relocate/bundle)' dist/check/PackageInfo)" = 0 ] \
+    || { echo "IpBump.app came out relocatable"; exit 1; }
 
 LIBRARY=dist/library
 mkdir -p "$LIBRARY/PrivilegedHelperTools" "$LIBRARY/LaunchDaemons" "$LIBRARY/LaunchAgents"
