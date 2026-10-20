@@ -4,15 +4,15 @@ import Foundation
 public enum NetworkSetup {
     public static let path = "/usr/sbin/networksetup"
 
+    /// DNS servers in the config are set by hand; without any, the service takes the network's ("Empty").
     public static func commands(for c: IpConfig, currentlyDhcp: Bool) -> [[String]] {
-        let dnsFromNetwork = ["-setdnsservers", c.service, "Empty"]
+        let dns = [c.dns1, c.dns2].filter { !$0.isEmpty }
+        let setDns = dns.isEmpty ? ["-setdnsservers", c.service, "Empty"] : ["-setdnsservers", c.service] + dns
         if c.dhcp {
             // Only ask for DHCP when it isn't on already: asking again would renew the lease for nothing
-            return (currentlyDhcp ? [] : [["-setdhcp", c.service]]) + [dnsFromNetwork]
+            return (currentlyDhcp ? [] : [["-setdhcp", c.service]]) + [setDns]
         }
-        let dns = [c.dns1, c.dns2].filter { !$0.isEmpty }
-        return [["-setmanual", c.service, c.ip, c.mask, c.router],
-                dns.isEmpty ? dnsFromNetwork : ["-setdnsservers", c.service] + dns]
+        return [["-setmanual", c.service, c.ip, c.mask, c.router], setDns]
     }
 
     /// nil when the command worked. networksetup can print an error and still exit with 0, so its text counts too.

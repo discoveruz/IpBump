@@ -32,6 +32,16 @@ struct SystemNetworkTests {
         #expect(state.dns1 == "1.1.1.1" && state.dns2 == "" && !state.up)
     }
 
+    @Test func knowsDnsSetByHand() {
+        let byHand = SystemNetwork.state(service: "Wi-Fi", interface: "en0", setupIPv4: ["ConfigMethod": "DHCP"], stateIPv4: nil,
+                                         dns: ["ServerAddresses": ["8.8.8.8"]], setupDNS: ["ServerAddresses": ["8.8.8.8"]],
+                                         linkActive: true)
+        #expect(byHand.dnsManual && byHand.dns1 == "8.8.8.8")
+        let fromNetwork = SystemNetwork.state(service: "Wi-Fi", interface: "en0", setupIPv4: ["ConfigMethod": "DHCP"], stateIPv4: nil,
+                                              dns: ["ServerAddresses": ["192.168.1.1"]], linkActive: true)
+        #expect(!fromNetwork.dnsManual)
+    }
+
     @Test func managesOnlyEthernetLikeServices() {
         #expect(SystemNetwork.isSupported(interfaceType: "Ethernet") && SystemNetwork.isSupported(interfaceType: "IEEE80211"))
         #expect(!SystemNetwork.isSupported(interfaceType: "PPP") && !SystemNetwork.isSupported(interfaceType: "VPN"))

@@ -59,13 +59,14 @@ public enum HelperValidation {
         switch request {
         case .apply(let c):
             try check(service: c.service, services)
+            // DNS servers go to networksetup for DHCP too, when they were set by hand
+            for dns in [c.dns1, c.dns2] where !dns.isEmpty && !IPv4.isValid(dns) {
+                throw IpBumpError("Invalid address \"\(dns)\".")
+            }
             if c.dhcp { return }
             guard IPv4.isValid(c.ip) else { throw IpBumpError("Invalid IP address \"\(c.ip)\".") }
             guard IPv4.isMask(c.mask) else { throw IpBumpError("Invalid subnet mask \"\(c.mask)\".") }
             guard IPv4.isValid(c.router) else { throw IpBumpError("Invalid router address \"\(c.router)\".") }
-            for dns in [c.dns1, c.dns2] where !dns.isEmpty && !IPv4.isValid(dns) {
-                throw IpBumpError("Invalid address \"\(dns)\".")
-            }
         case .probe(let service, let addresses):
             try check(service: service, services)
             guard !addresses.isEmpty else { throw IpBumpError("No addresses to probe.") }

@@ -26,6 +26,12 @@ struct HelperProtocolTests {
         try HelperValidation.validate(.apply(IpConfig(service: "Wi-Fi", dhcp: true)), services: ["Wi-Fi"])
     }
 
+    @Test func dhcpRequestsHaveTheirDnsChecked() {
+        #expect(throws: IpBumpError("Invalid address \"x\".")) {
+            try HelperValidation.validate(.apply(IpConfig(service: "Wi-Fi", dns1: "x", dhcp: true)), services: ["Wi-Fi"])
+        }
+    }
+
     @Test func checksEveryAddress() {
         let ok = IpConfig(service: "Wi-Fi", ip: "192.168.1.20", mask: "255.255.255.0", router: "192.168.1.1")
         func bad(_ c: IpConfig, _ message: String) {

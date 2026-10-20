@@ -25,6 +25,12 @@ struct NetworkSetupTests {
             == [["-setdnsservers", "Wi-Fi", "Empty"]])
     }
 
+    /// Review fix: putting back a DHCP service whose DNS servers were set by hand keeps those servers.
+    @Test func dhcpKeepsDnsSetByHand() {
+        #expect(NetworkSetup.commands(for: IpConfig(service: "Wi-Fi", dns1: "8.8.8.8", dns2: "1.1.1.1", dhcp: true), currentlyDhcp: false)
+            == [["-setdhcp", "Wi-Fi"], ["-setdnsservers", "Wi-Fi", "8.8.8.8", "1.1.1.1"]])
+    }
+
     @Test func recognisesFailures() {
         #expect(NetworkSetup.failure(exitCode: 0, output: "") == nil)
         #expect(NetworkSetup.failure(exitCode: 0, output: "** Error: The parameters were not valid.\n") == "** Error: The parameters were not valid.")

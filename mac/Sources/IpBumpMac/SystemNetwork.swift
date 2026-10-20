@@ -29,6 +29,7 @@ public struct SystemNetwork: NetworkReader {
                           setupIPv4: value(store, "Setup:/Network/Service/\(service.id)/IPv4"),
                           stateIPv4: value(store, "State:/Network/Service/\(service.id)/IPv4"),
                           dns: value(store, "State:/Network/Service/\(service.id)/DNS"),
+                          setupDNS: value(store, "Setup:/Network/Service/\(service.id)/DNS"),
                           linkActive: value(store, "State:/Network/Interface/\(service.bsd)/Link")?["Active"] as? Bool)
     }
 
@@ -43,7 +44,7 @@ public struct SystemNetwork: NetworkReader {
 
     /// What the dynamic store says about one service.
     public static func state(service: String, interface: String, setupIPv4: [String: Any]?, stateIPv4: [String: Any]?,
-                             dns: [String: Any]?, linkActive: Bool?) -> ServiceState {
+                             dns: [String: Any]?, setupDNS: [String: Any]? = nil, linkActive: Bool?) -> ServiceState {
         let addresses = stateIPv4?["Addresses"] as? [String] ?? []
         let masks = stateIPv4?["SubnetMasks"] as? [String] ?? []
         // 169.254.x.x is what macOS gives itself when it has no real address
@@ -56,7 +57,9 @@ public struct SystemNetwork: NetworkReader {
             ip: index.map { addresses[$0] } ?? "",
             mask: index.flatMap { masks.indices.contains($0) ? masks[$0] : nil } ?? "",
             router: stateIPv4?["Router"] as? String ?? "",
-            dns1: servers.first ?? "", dns2: servers.dropFirst().first ?? "")
+            dns1: servers.first ?? "", dns2: servers.dropFirst().first ?? "",
+            // DNS servers in the service's own setup were typed in; State shows them as well as DHCP's
+            dnsManual: !(setupDNS?["ServerAddresses"] as? [String] ?? []).isEmpty)
     }
 
     /// The enabled services in the current location, in the order System Settings shows them.

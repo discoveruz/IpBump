@@ -28,16 +28,21 @@ public struct ServiceState: Equatable, Sendable {
     public var router: String
     public var dns1: String
     public var dns2: String
+    /// The DNS servers were set by hand rather than handed out by DHCP.
+    public var dnsManual: Bool
 
     public init(service: String = "", interface: String = "", up: Bool = false, dhcp: Bool = false, ip: String = "",
-                mask: String = "", router: String = "", dns1: String = "", dns2: String = "") {
+                mask: String = "", router: String = "", dns1: String = "", dns2: String = "", dnsManual: Bool = false) {
         self.service = service; self.interface = interface; self.up = up; self.dhcp = dhcp
-        self.ip = ip; self.mask = mask; self.router = router; self.dns1 = dns1; self.dns2 = dns2
+        self.ip = ip; self.mask = mask; self.router = router; self.dns1 = dns1; self.dns2 = dns2; self.dnsManual = dnsManual
     }
 
-    /// The settings that put the service back the way it is now.
+    /// The settings that put the service back the way it is now. A DHCP service's DNS servers come from the
+    /// network unless someone set them by hand, and only those are carried over.
     public var config: IpConfig {
-        IpConfig(service: service, ip: ip, mask: mask, router: router, dns1: dns1, dns2: dns2, dhcp: dhcp)
+        let keepDns = !dhcp || dnsManual
+        return IpConfig(service: service, ip: ip, mask: mask, router: router,
+                        dns1: keepDns ? dns1 : "", dns2: keepDns ? dns2 : "", dhcp: dhcp)
     }
 }
 
