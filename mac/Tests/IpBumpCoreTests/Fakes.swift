@@ -57,3 +57,22 @@ struct PassLock: ChangeLock {
 struct BusyLock: ChangeLock {
     func withLock<T>(_ body: () throws -> T) throws -> T { throw IpBumpError.changeRunning }
 }
+
+/// A link that plays back scripted frames: each receive call returns the next round.
+final class FakeLink: LinkLayer, @unchecked Sendable {
+    private var rounds: [[[UInt8]]]
+    private(set) var sent: [[UInt8]] = []
+
+    init(rounds: [[[UInt8]]]) { self.rounds = rounds }
+
+    func send(_ frame: [UInt8]) throws { sent.append(frame) }
+
+    func receive(for duration: Duration) throws -> [[UInt8]] {
+        rounds.isEmpty ? [] : rounds.removeFirst()
+    }
+
+    /// The target address of each request sent, read straight from bytes 38–41 of the frame.
+    var sentTargets: [UInt32] {
+        sent.map { f in UInt32(f[38]) << 24 | UInt32(f[39]) << 16 | UInt32(f[40]) << 8 | UInt32(f[41]) }
+    }
+}
