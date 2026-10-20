@@ -166,10 +166,10 @@ public struct Agent: Sendable {
     /// (dotfiles) stays a link: the file it points to is the one replaced. The file keeps its permissions; a new one
     /// is readable by its owner only, since these files can hold tokens.
     static func replace(_ file: URL, with bytes: [UInt8]) throws {
-        let real = file.resolvingSymlinksInPath()
-        let attributes = try? FileManager.default.attributesOfItem(atPath: real.path)
-        let mode = mode_t((attributes?[.posixPermissions] as? NSNumber)?.intValue ?? 0o600)
-        let aside = real.path + ".ipbump.tmp"
+        let real = destination(of: file.path)
+        var info = stat()
+        let mode: mode_t = stat(real, &info) == 0 ? info.st_mode & 0o7777 : 0o600
+        let aside = real + ".ipbump.tmp"
 
         unlink(aside)   // left over from an attempt that was cut short
         let fd = open(aside, O_WRONLY | O_CREAT | O_EXCL, mode)
@@ -181,10 +181,22 @@ public struct Agent: Sendable {
             if n < 0 { failure = errno } else { written += n }
         }
         close(fd)
-        if failure == 0 && rename(aside, real.path) != 0 { failure = errno }
+        if failure == 0 && rename(aside, real) != 0 { failure = errno }
         if failure != 0 {
             unlink(aside)
             throw POSIXError(POSIXErrorCode(rawValue: failure) ?? .EIO)
         }
+    }
+
+    /// The file a write must replace: the end of a chain of links, relative ones included, even when that file
+    /// doesn't exist yet (a dotfiles link set up before the agent ever wrote its config).
+    static func destination(of path: String) -> String {
+        var path = path
+        for _ in 0..<32 {   // a loop of links can't keep this going
+            guard let target = try? FileManager.default.destinationOfSymbolicLink(atPath: path) else { break }
+            path = target.hasPrefix("/") ? target
+                : ((path as NSString).deletingLastPathComponent as NSString).appendingPathComponent(target)
+        }
+        return path
     }
 }

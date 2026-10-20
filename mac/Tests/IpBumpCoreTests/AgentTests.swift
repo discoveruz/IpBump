@@ -129,6 +129,32 @@ struct AgentTests {
         #expect(try compact("dotfiles/settings.json").contains("claude-hook"))
     }
 
+    /// Review fix: a dotfiles link (relative, as GNU stow writes them) whose file doesn't exist yet stays a link,
+    /// and the file it names is created readable by its owner only.
+    @Test func followsADanglingLink() throws {
+        try mkdir(".claude")
+        try mkdir("dotfiles")
+        try FileManager.default.createSymbolicLink(atPath: path(".claude/settings.json"), withDestinationPath: "../dotfiles/settings.json")
+        try claude.connect()
+        #expect(isSymlink(".claude/settings.json"))
+        #expect(try compact("dotfiles/settings.json").contains("claude-hook"))
+        #expect(try mode("dotfiles/settings.json") == 0o600)
+    }
+
+    @Test func newFilesArePrivate() throws {
+        try mkdir(".claude")
+        try claude.connect()
+        #expect(try mode(".claude.json") == 0o600 && mode(".claude/settings.json") == 0o600)
+    }
+
+    @Test func disconnectKeepsFilePermissions() throws {
+        try mkdir(".claude")
+        try write(".claude.json", "{}", mode: 0o640)
+        try claude.connect()
+        try claude.disconnect()
+        #expect(try mode(".claude.json") == 0o640)
+    }
+
     @Test func writesTwoSpaceJson() throws {
         try mkdir(".claude")
         try claude.connect()
