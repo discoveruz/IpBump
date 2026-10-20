@@ -20,6 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let model = AppModel(settings: Wiring.settings(), reader: SystemNetwork(), changer: Wiring.changer(),
                              lastChange: Wiring.lastChange(), notifier: UserNotifier())
         self.model = model
+        settings = SettingsWindowController(model: model)
         statusItem = StatusItemController(model: model, openSettings: { [weak self] in self?.openSettings() })
         model.onUpdate = { [weak self] in self?.statusItem.render() }
         model.onNeedsSetup = { [weak self] in self?.openSettings() }
