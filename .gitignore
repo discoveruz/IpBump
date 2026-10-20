@@ -8,3 +8,8 @@ obj/
 
 # Installers written by build-installer.bat
 installer/output/
+
+# Mac build output (mac/build-installer.sh writes the installer to mac/dist/)
+mac/.build/
+mac/.swiftpm/
+mac/dist/
