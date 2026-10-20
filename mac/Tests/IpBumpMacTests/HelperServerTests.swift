@@ -71,9 +71,12 @@ final class HelperServerTests {
         #expect(backend.applied.count == 1)
     }
 
-    @Test func everyLocalUserMayConnect() throws {
+    /// Review fix: every login account may ask (they are all in the staff group); service accounts such as _www
+    /// or nobody, which are not, may not.
+    @Test func onlyLoginAccountsMayConnect() throws {
         var info = stat()
         #expect(stat(path, &info) == 0)
-        #expect(info.st_mode & 0o777 == 0o666)
+        #expect(info.st_mode & 0o777 == 0o660)
+        #expect(info.st_gid == getgrnam("staff").pointee.gr_gid)
     }
 }

@@ -14,8 +14,10 @@ enum LineSocket {
         let bound = withUnsafePointer(to: &address) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { bind(fd, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) }
         }
-        // Every account on this Mac may ask, as on Windows; nobody can reach a Unix socket from the network
-        guard bound == 0, chmod(path, 0o666) == 0, Darwin.listen(fd, 16) == 0 else {
+        // Every login account may ask, as on Windows: they are all in the staff group. Service accounts such as
+        // _www or nobody are not, and nobody can reach a Unix socket from the network
+        let staff = getgrnam("staff")?.pointee.gr_gid ?? 20
+        guard bound == 0, chown(path, uid_t.max, staff) == 0, chmod(path, 0o660) == 0, Darwin.listen(fd, 16) == 0 else {
             let error = posixError()
             close(fd)
             throw error
