@@ -22,3 +22,12 @@ final class Recorder<T>: @unchecked Sendable {
         return items
     }
 }
+
+/// Waits (up to five seconds) for something another task does.
+@MainActor
+func until(_ condition: () -> Bool) async {
+    for _ in 0..<500 {
+        if condition() { return }
+        try? await Task.sleep(for: .milliseconds(10))
+    }
+}

@@ -108,3 +108,26 @@ final class FakeChanger: IpChanging, @unchecked Sendable {
         if let error { throw error }
     }
 }
+
+struct Post: Equatable {
+    let title: String
+    let body: String
+    let isError: Bool
+
+    init(_ title: String, _ body: String, _ isError: Bool) { self.title = title; self.body = body; self.isError = isError }
+}
+
+final class FakeNotifier: Notifier, @unchecked Sendable {
+    private let lock = NSLock()
+    private var recorded: [Post] = []
+
+    var posts: [Post] {
+        lock.lock(); defer { lock.unlock() }
+        return recorded
+    }
+
+    func post(title: String, body: String, isError: Bool) {
+        lock.lock(); defer { lock.unlock() }
+        recorded.append(Post(title, body, isError))
+    }
+}
