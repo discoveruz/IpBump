@@ -1,10 +1,12 @@
 # IpBump
 
-A Windows tray app that moves your PC to a different local IPv4 address with a double-click.
+A Windows tray app and Mac menu bar app that moves your computer to a different local IPv4 address with a double-click (an Option-click on a Mac).
 
 IpBump looks for an address on your network that no other device is using, switches the network adapter to it, and puts the old address back if the new one does not work. AI agents such as Claude Code and Gemini CLI can ask for the same thing through a built-in MCP server.
 
 It changes the address on your local network (LAN) only. The public IP that websites see stays the same.
+
+This page describes the Windows app. The Mac app does the same from the menu bar: see [IpBump for Mac](mac/README.md).
 
 ## What it does
 
@@ -22,6 +24,8 @@ It changes the address on your local network (LAN) only. The public IP that webs
 
 ## Install
 
+### Windows
+
 Download `IpBump-Setup-<version>.exe` from the [latest release](https://github.com/discoveruz/IpBump/releases/latest) and run it. You can also [build the installer](#build) yourself.
 
 The installer is not signed, so Windows may show "Windows protected your PC". Choose **More info**, then **Run anyway**.
@@ -34,6 +38,16 @@ The installer asks for administrator rights once, to register the service. It of
 On the first start the settings window opens by itself. The adapter your PC is online with is already picked and its current values are filled in. Check them and press **Save**.
 
 IpBump gives the adapter a manual address. If your router hands out addresses by DHCP, limit the search to a range the router does not use, when you can. An address that is free now could otherwise be given to another device later.
+
+### Mac
+
+In Terminal:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/discoveruz/IpBump/main/mac/install.sh | sh
+```
+
+Or download `IpBump-<version>.pkg` from the same release and open it. The installer is not signed: when macOS refuses to open it, choose **Open Anyway** in **System Settings › Privacy & Security** and open it again. The rest is in [IpBump for Mac](mac/README.md).
 
 ## Use
 
@@ -190,4 +204,4 @@ Remove IpBump under **Settings > Apps > Installed apps**. The uninstaller remove
 
 [MIT](LICENSE)
 
-IpBump is built with .NET, WPF-UI, H.NotifyIcon and the Model Context Protocol C# SDK. Their licences are in [installer/THIRD-PARTY-NOTICES.txt](installer/THIRD-PARTY-NOTICES.txt), which the installer also places next to the app.
+IpBump is built with .NET, WPF-UI, H.NotifyIcon and the Model Context Protocol C# SDK. Their licences are in [installer/THIRD-PARTY-NOTICES.txt](installer/THIRD-PARTY-NOTICES.txt), which the installer also places next to the app. IpBump for Mac is built with the Model Context Protocol Swift SDK; see [IpBump for Mac](mac/README.md#license).
