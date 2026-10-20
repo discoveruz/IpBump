@@ -49,7 +49,9 @@ public struct SystemNetwork: NetworkReader {
         let masks = stateIPv4?["SubnetMasks"] as? [String] ?? []
         // 169.254.x.x is what macOS gives itself when it has no real address
         let index = addresses.firstIndex { IPv4.isValid($0) && !$0.hasPrefix("169.254.") }
-        let servers = (dns?["ServerAddresses"] as? [String] ?? []).filter(IPv4.isValid)
+        // DNS servers typed into the service's setup replace DHCP's; State holds only DHCP's, and nothing for a manual service
+        let typed = setupDNS?["ServerAddresses"] as? [String] ?? []
+        let servers = (typed.isEmpty ? dns?["ServerAddresses"] as? [String] ?? [] : typed).filter(IPv4.isValid)
         return ServiceState(
             service: service, interface: interface,
             up: linkActive ?? (stateIPv4 != nil),   // a bridge, say, has no link state of its own
@@ -58,8 +60,7 @@ public struct SystemNetwork: NetworkReader {
             mask: index.flatMap { masks.indices.contains($0) ? masks[$0] : nil } ?? "",
             router: stateIPv4?["Router"] as? String ?? "",
             dns1: servers.first ?? "", dns2: servers.dropFirst().first ?? "",
-            // DNS servers in the service's own setup were typed in; State shows them as well as DHCP's
-            dnsManual: !(setupDNS?["ServerAddresses"] as? [String] ?? []).isEmpty)
+            dnsManual: !typed.isEmpty)
     }
 
     /// The enabled services in the current location, in the order System Settings shows them.

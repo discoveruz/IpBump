@@ -42,6 +42,24 @@ struct SystemNetworkTests {
         #expect(!fromNetwork.dnsManual)
     }
 
+    /// What scutil showed for this Mac's Ethernet after IpBump gave it a manual address: State has no DNS key at all.
+    @Test func readsDnsTypedIntoAManualService() {
+        let state = SystemNetwork.state(
+            service: "USB 10/100 LAN 2", interface: "en9", setupIPv4: ["ConfigMethod": "Manual"],
+            stateIPv4: ["Addresses": ["192.168.44.23"], "SubnetMasks": ["255.255.255.0"], "Router": "192.168.44.1"],
+            dns: nil, setupDNS: ["ServerAddresses": ["10.104.50.2", "10.104.50.3"]], linkActive: true)
+        #expect(state.dns1 == "10.104.50.2" && state.dns2 == "10.104.50.3" && state.dnsManual)
+        #expect(state.config.dns1 == "10.104.50.2" && state.config.dns2 == "10.104.50.3")   // putting it back keeps them
+    }
+
+    /// State holds what DHCP hands out; servers typed into the service replace them.
+    @Test func typedDnsReplacesTheNetworks() {
+        let state = SystemNetwork.state(service: "Wi-Fi", interface: "en0", setupIPv4: ["ConfigMethod": "DHCP"], stateIPv4: nil,
+                                        dns: ["ServerAddresses": ["192.168.1.1"]],
+                                        setupDNS: ["ServerAddresses": ["8.8.8.8", "1.1.1.1"]], linkActive: true)
+        #expect(state.dns1 == "8.8.8.8" && state.dns2 == "1.1.1.1" && state.dnsManual)
+    }
+
     @Test func managesOnlyEthernetLikeServices() {
         #expect(SystemNetwork.isSupported(interfaceType: "Ethernet") && SystemNetwork.isSupported(interfaceType: "IEEE80211"))
         #expect(!SystemNetwork.isSupported(interfaceType: "PPP") && !SystemNetwork.isSupported(interfaceType: "VPN"))
