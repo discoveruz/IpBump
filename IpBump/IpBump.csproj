@@ -8,7 +8,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>IpBump</AssemblyName>
     <RootNamespace>IpBump</RootNamespace>
-    <Version>2.3.0</Version>
+    <Version>2.3.1</Version>
     <Product>IpBump</Product>
     <ApplicationIcon>Assets\IpBump.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
