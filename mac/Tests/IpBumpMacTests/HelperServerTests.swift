@@ -10,7 +10,8 @@ final class HelperServerTests {
     var client: SocketHelper { SocketHelper(socketPath: path) }
 
     init() throws {
-        server = HelperServer(socketPath: path, backend: backend, readTimeout: .milliseconds(200))
+        // The helper's own read deadline: a busy test machine needs a while to send a long request
+        server = HelperServer(socketPath: path, backend: backend)
         try server.start()
     }
 
@@ -86,10 +87,48 @@ final class HelperServerTests {
         #expect(backend.applied.count == 1)
     }
 
+    /// Review fix: a helper stopped while it serves a client must not wait for another one. By then its socket's
+    /// number can belong to another socket (another helper's, in tests that run side by side), whose clients it
+    /// would take and hang up on.
+    @Test func stopsAfterTheClientItIsServing() throws {
+        let otherPath = temporarySocketPath()
+        let slow = FakeBackend()
+        let started = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
+        slow.hold = (started, release)
+        let other = HelperServer(socketPath: otherPath, backend: slow)
+        let accepts = Counter()
+        other.acceptClient = { fd in
+            accepts.add()
+            return accept(fd, nil, nil)
+        }
+        try other.start()
+        defer { unlink(otherPath) }
+
+        let answered = DispatchSemaphore(value: 0)
+        Thread.detachNewThread {
+            try? SocketHelper(socketPath: otherPath).apply(IpConfig(service: "Wi-Fi", dhcp: true))
+            answered.signal()
+        }
+        try #require(started.wait(timeout: .now() + 5) == .success)   // the helper is busy with that client
+        other.stop()
+        release.signal()
+        try #require(answered.wait(timeout: .now() + 5) == .success)
+        Thread.sleep(forTimeInterval: 0.2)   // a helper that goes on is back in accept() long before this
+        #expect(slow.applied.count == 1)
+        #expect(accepts.count == 1)
+    }
+
     @Test func dropsSilentClients() throws {
-        let silent = try #require(LineSocket.connect(path: path, timeout: .seconds(1)))
+        let otherPath = temporarySocketPath()
+        let other = HelperServer(socketPath: otherPath, backend: backend, readTimeout: .milliseconds(200))
+        try other.start()
+        defer {
+            other.stop()
+            unlink(otherPath)
+        }
+        let silent = try #require(LineSocket.connect(path: otherPath, timeout: .seconds(1)))
         defer { close(silent) }
-        try client.apply(IpConfig(service: "Wi-Fi", dhcp: true))
+        try SocketHelper(socketPath: otherPath).apply(IpConfig(service: "Wi-Fi", dhcp: true))
         #expect(backend.applied.count == 1)
     }
 

@@ -31,7 +31,10 @@ public final class HelperServer: @unchecked Sendable {
         let fd = try LineSocket.listen(path: socketPath)
         listener = fd
         Thread.detachNewThread { [self] in
-            while true {
+            // Only this thread closes the socket. Closed elsewhere while this thread serves a client, its number
+            // could go to another socket before the next accept(), which would then take that socket's clients
+            defer { close(fd) }
+            while !isStopped {
                 let client = acceptClient(fd)
                 if isStopped {
                     if client >= 0 { close(client) }
@@ -56,8 +59,8 @@ public final class HelperServer: @unchecked Sendable {
         state.lock()
         stopped = true
         state.unlock()
-        shutdown(listener, SHUT_RDWR)   // wakes the waiting accept()
-        close(listener)
+        // Wakes the thread if it waits in accept(); a thread busy with a client stops after that one
+        if let wake = LineSocket.connect(path: socketPath, timeout: .zero) { close(wake) }
         listener = -1
     }
 

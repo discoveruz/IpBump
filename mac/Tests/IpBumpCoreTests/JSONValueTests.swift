@@ -55,7 +55,7 @@ struct JSONValueTests {
         let start = ContinuousClock.now
         let once = try JSONValue.parse(big).render(pretty: true)
         #expect(try JSONValue.parse(once).render(pretty: true) == once)
-        #expect(ContinuousClock.now - start < .seconds(1))
+        #expect(ContinuousClock.now - start < .seconds(10))   // about 0.5 s on a current Mac; a quadratic slip takes hours
         #expect(once.contains(#""lastTotalInputTokens": 1729000000000"#) && once.contains("проект-3199 ʻ😀"))
     }
 }

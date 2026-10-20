@@ -18,6 +18,8 @@ final class FakeBackend: HelperBackend, @unchecked Sendable {
     var services = ["Wi-Fi"]
     var answered: Set<String> = []
     var applyError: String?
+    /// When set, apply() says it has started, then waits until the test lets it go on.
+    var hold: (started: DispatchSemaphore, release: DispatchSemaphore)?
     private var recorded: [IpConfig] = []
 
     var applied: [IpConfig] {
@@ -28,6 +30,10 @@ final class FakeBackend: HelperBackend, @unchecked Sendable {
     func serviceNames() -> [String] { services }
 
     func apply(_ config: IpConfig) throws {
+        if let hold {
+            hold.started.signal()
+            hold.release.wait()
+        }
         if let applyError { throw IpBumpError(applyError) }
         lock.lock(); defer { lock.unlock() }
         recorded.append(config)
@@ -48,5 +54,21 @@ final class Countdown: @unchecked Sendable {
         guard left > 0 else { return false }
         left -= 1
         return true
+    }
+}
+
+/// Counts calls made from any thread.
+final class Counter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var calls = 0
+
+    func add() {
+        lock.lock(); defer { lock.unlock() }
+        calls += 1
+    }
+
+    var count: Int {
+        lock.lock(); defer { lock.unlock() }
+        return calls
     }
 }
